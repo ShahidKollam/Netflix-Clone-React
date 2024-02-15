@@ -1,5 +1,8 @@
 import { Box, CardMedia, Grid, Card } from "@mui/material";
+import { doc, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { database } from "../firebase/setup";
 
 function Home() {
   const [movies, setMovies] = useState([]);
@@ -19,8 +22,17 @@ function Home() {
     getMovie();
   }, []);
 
+  const addMovie = async (movie) => {
+    const movieRef = doc(database, "Movies", `${movie.id}`);
+    try {
+      await setDoc(movieRef, { movieName: movie.original_title });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <div>
+    <div style={{ backgroundColor: "black" }}>
       <Grid
         container
         spacing={2}
@@ -31,16 +43,21 @@ function Home() {
         }}
       >
         {movies.map((movie) => {
+          {
+            addMovie(movie);
+          }
           return (
             <Grid item xs={3}>
               <Box>
-                <Card>
-                  <CardMedia
-                    component="img"
-                    height="140"
-                    image={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
-                  ></CardMedia>
-                </Card>
+                <Link to="Movies" state={{ movie: movie }}>
+                  <Card>
+                    <CardMedia
+                      component="img"
+                      height="140"
+                      image={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
+                    ></CardMedia>
+                  </Card>
+                </Link>
               </Box>
             </Grid>
           );
